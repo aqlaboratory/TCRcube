@@ -1,4 +1,5 @@
 import torch
+import sys
 import pandas as pd
 import argparse
 from torch.utils.data import DataLoader
@@ -20,13 +21,16 @@ if __name__=='__main__':
     # paths to pre-computed repres
     parser.add_argument("--pos_dir", type=str, default=None, help="Directory with pre-computed full-lenght AF2/ESM2 repres for test positives")
     parser.add_argument("--neg_dir", type=str, default=None, help="Directory with pre-computed full-lenght AF2/ESM2 repres for test negatives")
+    parser.add_argument("--pos_prefix", type=str, default="pos", help="Prefix of the AF2 repres of the positive data points")
+    parser.add_argument("--neg_prefix", type=str, default="neg", help="Prefix of the AF2 repres of the negative data points")
     parser.add_argument("--cdr3a_esm2isol_dir", type=str, default=None, help="Directory with pre-computed CDR3a ESM2 isolated repres")
     parser.add_argument("--cdr3b_esm2isol_dir", type=str, default=None, help="Directory with pre-computed CDR3b ESM2 isolated repres")
     parser.add_argument("--pep_esm2isol_dir", type=str, default=None, help="Directory with pre-computed peptide ESM2 isolated repres")
     parser.add_argument("--mhc_esm2isol_dir", type=str, default=None, help="Directory with pre-computed MHC ESM2 isolated repres")
 
+
     # general options
-    parser.add_argument("-g", "--gpu", type=int, default=0, help="Number of gpu to use. Default=0")
+    parser.add_argument("-g", "--gpu", type=int, default=0, help="Number of gpu to use. Default = 0")
     parser.add_argument("--batchsize",type=int, default = 64, help="Batch size")
     parser.add_argument("-t", "--model_type", type=str, default="AAidpos", help="Type of the TCRcube model based on embeddings (AAidpos | AAid | AF2evo | AF2str | ESM2full | ESM2isol)")
     parser.add_argument("--outfile",type=str, default = "predictions.csv", help="Output CSV file for predictions")
@@ -49,21 +53,36 @@ if __name__=='__main__':
             dataset = AAidDataset (options.csv)   
             model = TCRcube_AAid(inner_dim) 
         case "AF2evo":
-            dataset = AF2EvoformerDataset (options.csv,options.pos_dir,options.neg_dir)
+            if (options.pos_dir) is None or (options.neg_dir) is None:
+                sys.stderr.write ("You need to define directories with pre-computed AF2 repres (--pos_dir and --neg_dir)!\n")
+                exit(1)
+            dataset = AF2EvoformerDataset (options.csv,options.pos_dir,options.neg_dir,options.pos_prefix,options.neg_prefix)
             Adim = dataset[0][0].shape[1] #dimensions of AF2 embeddings
             model = TCRcube(Adim, Adim, Adim, Adim, inner_dim)
         case "AF2str":
-            dataset = AF2StrModDataset (options.csv,options.pos_dir,options.neg_dir) 
+            if (options.pos_dir) is None or (options.neg_dir) is None:
+                sys.stderr.write ("You need to define directories with pre-computed AF2 repres (--pos_dir and --neg_dir)!\n")
+                exit(1)            
+            dataset = AF2StrModDataset (options.csv,options.pos_dir,options.neg_dir,options.pos_prefix,options.neg_prefix) 
             Adim = dataset[0][0].shape[1] #dimensions of AF2 embeddings
             model = TCRcube(Adim, Adim, Adim, Adim, inner_dim)            
         case "ESM2full":
+            if (options.pos_dir) is None or (options.neg_dir) is None:
+                sys.stderr.write ("You need to define directories with pre-computed ESM2 repres (--pos_dir and --neg_dir)!\n")
+                exit(1)            
             dataset = ESM2FullDataset (options.csv,options.pos_dir,options.neg_dir)
             Edim = dataset[0][0].shape[1] #dimensions of ESM2 embeddings
             model = TCRcube(Edim, Edim, Edim, Edim, inner_dim)
         case "ESM2isol":
+            if (options.cdr3a_esm2isol_dir) is None or (options.cdr3b_esm2isol_dir) is None or (options.mhc_esm2isol_dir) is None or (options.pep_esm2isol_dir) is None:
+                sys.stderr.write ("You need to define directories with pre-computed ESM2 repres (--cdr3a_esm2isol_dir, --cdr3a_esm2isol_dir,--pep_esm2isol_dir, --mhc_esm2isol_dir)!\n")
+                exit(1)            
             dataset = ESM2IsolDataset (options.csv,options.cdr3a_esm2isol_dir,options.cdr3b_esm2isol_dir, options.pep_esm2isol_dir,options.mhc_esm2isol_dir) 
             Edim = dataset[0][0].shape[1] #dimensions of ESM2 embeddings
             model = TCRcube(Edim, Edim, Edim, Edim, inner_dim)
+        case _:
+            sys.stderr.write ("Wrong model type, please choose from: AAidpos | AAid | AF2evo | AF2str | ESM2full | ESM2isol\n")
+    
 
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()

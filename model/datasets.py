@@ -23,9 +23,9 @@ class ESM2FullDataset(Dataset):
         # load pre-computed ESM2 embeddings
         # naming convention: targetid.pt
         if data['binds']==1: # positive data points have different prefix then negative
-            repres=torch.load(os.path.join(self.esm2_pos_dir, '%s.pt' % (data['targetid'])))['representations'][33] 
+            repres=torch.load(os.path.join(self.esm2_pos_dir, '%s.pt' % (data['targetid'])))['representations'][36] 
         else:
-            repres=torch.load(os.path.join(self.esm2_neg_dir, '%s.pt' % (data['targetid'])))['representations'][33] 
+            repres=torch.load(os.path.join(self.esm2_neg_dir, '%s.pt' % (data['targetid'])))['representations'][36] 
         # now let's extract CDR3a, CDR3b, peptide and MHC
         fullseq=data['target_chainseq'].replace("/",50*"G") # add polyGly like during ESM2 inference
         cdr3bstart=fullseq.find(data['cdr3b'])
@@ -61,10 +61,10 @@ class ESM2IsolDataset(Dataset):
         data = self.df.iloc[index] # select row in pandas data frame
         # load pre-computed ESM2 embeddings
         # naming convention: sequence.pt (MHC_allele.pt for MHC)
-        CDR3a = torch.load(os.path.join(self.cdr3adir, '%s.pt' % (data['cdr3_sequence_alpha'])))['representations'][33]
-        CDR3b = torch.load(os.path.join(self.cdr3bdir, '%s.pt' % (data['cdr3_sequence_beta'])))['representations'][33]
-        peptide = torch.load(os.path.join(self.pepdir, '%s.pt' % (data['epitope'])))['representations'][33]
-        mhc = torch.load(os.path.join(self.mhcdir, '%s.pt' % (data['mhc_alpha'].replace("*","").replace(":",""))))['representations'][33]
+        CDR3a = torch.load(os.path.join(self.cdr3adir, '%s.pt' % (data['cdr3a'])))['representations'][36]
+        CDR3b = torch.load(os.path.join(self.cdr3bdir, '%s.pt' % (data['cdr3b'])))['representations'][36]
+        peptide = torch.load(os.path.join(self.pepdir, '%s.pt' % (data['peptide'])))['representations'][36]
+        mhc = torch.load(os.path.join(self.mhcdir, '%s.pt' % (data['mhc_alpha'].replace("*","").replace(":",""))))['representations'][36]
         mhcseq=data['target_chainseq'].split("/")[0]
         l=[len(data['cdr3a']),len(data['cdr3b']),len(data['peptide']),len(mhcseq)]
         binds = torch.tensor(data['binds'], dtype=torch.float32)#.reshape(1,) # 0/1
@@ -77,18 +77,20 @@ class AF2EvoformerDataset(Dataset):
     """
     Dataset of AF2 evoformer embeddings of the whole pMHC-TCR complex
     """
-    def __init__(self, csv_file, af2_pos_dir, af2_neg_dir):
+    def __init__(self, csv_file, af2_pos_dir, af2_neg_dir,pos_prefix,neg_prefix):
         self.df=pd.read_csv(csv_file, sep=';') # pandas data frame with sequences and binding status (0/1)
         self.pos_dir=af2_pos_dir
         self.neg_dir=af2_neg_dir
+        self.pos_prefix=pos_prefix
+        self.neg_prefix=neg_prefix
 
     def __getitem__(self, index):
         data = self.df.iloc[index] # select row in pandas data frame
         # load pre-computed AF2 embeddings
         if data['binds']==1: # positive data points have different prefix then negative
-            fname=os.path.join(self.pos_dir,f"pos_{data['targetid']}_model_1_model_2_ptm_single.npy")
+            fname=os.path.join(self.pos_dir,f"{self.pos_prefix}_{data['targetid']}_model_1_model_2_ptm_single.npy")
         else:
-            fname=os.path.join(self.neg_dir,f"neg_{data['targetid']}_model_1_model_2_ptm_single.npy")
+            fname=os.path.join(self.neg_dir,f"{self.neg_prefix}_{data['targetid']}_model_1_model_2_ptm_single.npy")
         a=np.load(fname)
         repres=torch.from_numpy(a) # representations of the full-length pMHC-TCR
         # now let's extract CDR3a, CDR3b, peptide and MHC
@@ -115,18 +117,20 @@ class AF2StrModDataset(Dataset):
     """
     Dataset of AF2 structure module embeddings of the whole pMHC-TCR complex
     """
-    def __init__(self, csv_file, af2_pos_dir, af2_neg_dir):
+    def __init__(self, csv_file, af2_pos_dir, af2_neg_dir,pos_prefix,neg_prefix):
         self.df=pd.read_csv(csv_file, sep=';') # pandas data frame with sequences and binding status (0/1)
         self.pos_dir=af2_pos_dir
         self.neg_dir=af2_neg_dir
+        self.pos_prefix=pos_prefix
+        self.neg_prefix=neg_prefix
 
     def __getitem__(self, index):
         data = self.df.iloc[index] # select row in pandas data frame
         # load pre-computed AF2 embeddings
         if data['binds']==1: # positive data points have different prefix then negative
-            fname=os.path.join(self.pos_dir,f"pos_{data['targetid']}_model_1_model_2_ptm_structure-single.npy")
+            fname=os.path.join(self.pos_dir,f"{self.pos_prefix}_{data['targetid']}_model_1_model_2_ptm_structure-single.npy")
         else:
-            fname=os.path.join(self.neg_dir,f"neg_{data['targetid']}_model_1_model_2_ptm_structure-single.npy")
+            fname=os.path.join(self.neg_dir,f"{self.neg_prefix}_{data['targetid']}_model_1_model_2_ptm_structure-single.npy")
         a=np.load(fname)
         repres=torch.from_numpy(a) # representations of the full-length pMHC-TCR
         # now let's extract CDR3a, CDR3b, peptide and MHC
