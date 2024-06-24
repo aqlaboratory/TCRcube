@@ -1,3 +1,9 @@
+"""
+TCRcube set of ML models for pMHC-TCR interaction prediction
+This script uses pre-trained TCRcube models of different flavors 
+to predict pMHC-TCR binding on desired test set
+"""
+
 import torch
 import sys
 import pandas as pd
@@ -33,7 +39,10 @@ if __name__=='__main__':
     parser.add_argument("-g", "--gpu", type=int, default=0, help="Number of gpu to use. Default = 0")
     parser.add_argument("--batchsize",type=int, default = 64, help="Batch size")
     parser.add_argument("-t", "--model_type", type=str, default="AAidpos", help="Type of the TCRcube model based on embeddings (AAidpos | AAid | AF2evo | AF2str | ESM2full | ESM2isol)")
+
+    #Output
     parser.add_argument("--outfile",type=str, default = "predictions.csv", help="Output CSV file for predictions")
+
     options = parser.parse_args()
 
     # Try to calculate on GPU
@@ -75,13 +84,14 @@ if __name__=='__main__':
             model = TCRcube(Edim, Edim, Edim, Edim, inner_dim)
         case "ESM2isol":
             if (options.cdr3a_esm2isol_dir) is None or (options.cdr3b_esm2isol_dir) is None or (options.mhc_esm2isol_dir) is None or (options.pep_esm2isol_dir) is None:
-                sys.stderr.write ("You need to define directories with pre-computed ESM2 repres (--cdr3a_esm2isol_dir, --cdr3a_esm2isol_dir,--pep_esm2isol_dir, --mhc_esm2isol_dir)!\n")
+                sys.stderr.write ("You need to define directories with pre-computed ESM2 repres (--cdr3a_esm2isol_dir, --cdr3b_esm2isol_dir,--pep_esm2isol_dir, --mhc_esm2isol_dir)!\n")
                 exit(1)            
             dataset = ESM2IsolDataset (options.csv,options.cdr3a_esm2isol_dir,options.cdr3b_esm2isol_dir, options.pep_esm2isol_dir,options.mhc_esm2isol_dir) 
             Edim = dataset[0][0].shape[1] #dimensions of ESM2 embeddings
             model = TCRcube(Edim, Edim, Edim, Edim, inner_dim)
         case _:
             sys.stderr.write ("Wrong model type, please choose from: AAidpos | AAid | AF2evo | AF2str | ESM2full | ESM2isol\n")
+            exit(1)
     
 
     model.load_state_dict(checkpoint['model_state_dict'])
