@@ -1,1 +1,0 @@
-# Scripts for pre-computing AF2 / ESM2 repres

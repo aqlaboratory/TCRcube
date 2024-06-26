@@ -25,7 +25,17 @@ This would clone the repository, install dependencies and set up TCRcube as a pa
 
 ## Inference on test set using pre-trained models
 
-* 
+* Use [predict.py](predict.py) script for inference, see `python predict.py -h` for options
+* You will need test set CSV files and for the respective models also pre-computed ESM2 / AF2 representations.
+* See e.g. [test_panpeptide.csv](data/test_panpeptide.csv) for example input CSV file with the test set data
+* Outputs AUROC and AUPR and CSV file with predictions for individual data points
+* Example for amino acid identity model: `python predict.py -g 0 -t AAidpos data/test_panpeptide.csv checkpoints/panpeptide_AAidpos.pt --outfile AAidpos_panpeptide.csv`
+* Example for AF2-evo model: `python predict.py -g 0 -t AF2evo data/test_panpeptide.csv checkpoints/panpeptide_AF2-evo.pt --pos_dir AF2repres/panpeptide_pos --neg_dir AF2repres/panpeptide_neg --outfile AF2-evo_panpeptide.csv`
+* Example for ESM2-isol model: `python predict.py -g 0 -t ESM2isol data/test_panpeptide.csv checkpoints/panpeptide_ESM2-isol.pt --cdr3a_esm2isol_dir ESM2repres/cdr3a/ --cdr3b_esm2isol_dir ESM2repres/cdr3b --pep_esm2isol_dir ESM2repres/pep --mhc_esm2isol_dir ESM2repres/mhc`
 
 ## Training
+
+* Use [train.py](predict.py) script for inference, see `python train.py -h` for options
+* You will need train and test set CSV files and for the respective models also pre-computed ESM2 / AF2 representations.
+* Example for training ESM2-full version of the model: `python -u train.py -g 0 data/train_panpeptide.csv data/test_panpeptide.csv -t ESM2full --pos_dir_train ESM2repres/full_train_pos --neg_dir_train ESM2repres/full_train_neg/ --pos_dir_test ESM2repres/full_test_pos/ --neg_dir_test ESM2repres/full_train_neg/ --out_checkpoint panpeptide_ESM2-full.pt > train_panpeptide_ESM2-full.out`
 
