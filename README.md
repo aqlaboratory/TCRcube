@@ -40,9 +40,14 @@ python predict.py -g 0 -t AF2evo data/test_panpeptide.csv checkpoints/panpeptide
         --neg_dir AF2repres/panpeptide_neg 
         --outfile AF2-evo_panpeptide.csv
 ```
-* Example for ESM2-isol model: ```bash
-python predict.py -g 0 -t ESM2isol data/test_panpeptide.csv checkpoints/panpeptide_ESM2-isol.pt --cdr3a_esm2isol_dir ESM2repres/cdr3a/ --cdr3b_esm2isol_dir ESM2repres/cdr3b --pep_esm2isol_dir ESM2repres/pep --mhc_esm2isol_dir ESM2repres/mhc
-``
+* Example for ESM2-isol model: 
+```bash
+python predict.py -g 0 -t ESM2isol data/test_panpeptide.csv checkpoints/panpeptide_ESM2-isol.pt 
+        --cdr3a_esm2isol_dir ESM2repres/cdr3a/ 
+        --cdr3b_esm2isol_dir ESM2repres/cdr3b 
+        --pep_esm2isol_dir ESM2repres/pep 
+        --mhc_esm2isol_dir ESM2repres/mhc
+```
 
 ## Training
 
@@ -55,7 +60,6 @@ python -u train.py -g 0 data/train_panpeptide.csv data/test_panpeptide.csv -t ES
         --neg_dir_train ESM2repres/full_train_neg/ 
         --pos_dir_test ESM2repres/full_test_pos/ 
         --neg_dir_test ESM2repres/full_train_neg/ 
-        --out_checkpoint panpeptide_ESM2-full.pt 
-        > train_panpeptide_ESM2-full.out
+        --out_checkpoint panpeptide_ESM2-full.pt  > train_panpeptide_ESM2-full.out
 ```
 
