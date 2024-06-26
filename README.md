@@ -29,7 +29,10 @@ This would clone the repository, install dependencies and set up TCRcube as a pa
 * You will need test set CSV files and for the respective models also pre-computed ESM2 / AF2 representations.
 * See e.g. [test_panpeptide.csv](data/test_panpeptide.csv) for example input CSV file with the test set data
 * Outputs AUROC and AUPR and CSV file with predictions for individual data points
-* Example for amino acid identity model: `python predict.py -g 0 -t AAidpos data/test_panpeptide.csv checkpoints/panpeptide_AAidpos.pt --outfile AAidpos_panpeptide.csv`
+* Example for amino acid identity model: 
+```bash
+python predict.py -g 0 -t AAidpos data/test_panpeptide.csv checkpoints/panpeptide_AAidpos.pt --outfile AAidpos_panpeptide.csv
+```
 * Example for AF2-evo model: 
 ```bash
 python predict.py -g 0 -t AF2evo data/test_panpeptide.csv checkpoints/panpeptide_AF2-evo.pt 
@@ -37,7 +40,9 @@ python predict.py -g 0 -t AF2evo data/test_panpeptide.csv checkpoints/panpeptide
         --neg_dir AF2repres/panpeptide_neg 
         --outfile AF2-evo_panpeptide.csv
 ```
-* Example for ESM2-isol model: `python predict.py -g 0 -t ESM2isol data/test_panpeptide.csv checkpoints/panpeptide_ESM2-isol.pt --cdr3a_esm2isol_dir ESM2repres/cdr3a/ --cdr3b_esm2isol_dir ESM2repres/cdr3b --pep_esm2isol_dir ESM2repres/pep --mhc_esm2isol_dir ESM2repres/mhc`
+* Example for ESM2-isol model: ```bash
+python predict.py -g 0 -t ESM2isol data/test_panpeptide.csv checkpoints/panpeptide_ESM2-isol.pt --cdr3a_esm2isol_dir ESM2repres/cdr3a/ --cdr3b_esm2isol_dir ESM2repres/cdr3b --pep_esm2isol_dir ESM2repres/pep --mhc_esm2isol_dir ESM2repres/mhc
+``
 
 ## Training
 
