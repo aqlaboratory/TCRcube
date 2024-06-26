@@ -1,0 +1,32 @@
+--- predict_utils.py	2024-06-25 13:36:04.376062057 +0200
++++ predict_utils_mod.py	2024-06-26 10:21:23.105967319 +0200
+@@ -219,6 +219,7 @@
+     unrelaxed_pdb_lines = []
+     relaxed_pdb_lines = []
+     model_names = []
++    representations = []
+ 
+     metric_tags = 'plddt ptm predicted_aligned_error'.split()
+ 
+@@ -239,6 +240,8 @@
+         else:
+             prediction_result = model_runner.predict(processed_feature_dict)
+ 
++        representations.append(prediction_result['representations'])
++
+         unrelaxed_protein = protein.from_prediction(
+             processed_feature_dict, prediction_result)
+         unrelaxed_pdb_lines.append(protein.to_pdb(unrelaxed_protein))
+@@ -261,6 +264,12 @@
+     for n, r in enumerate(lddt_rank):
+         print(f"model_{n+1} {np.mean(plddts[r])}")
+ 
++        #save AF2 representations for the best model
++        np.save(f'{prefix}_model_{n+1}_{model_names[r]}_single.npy',np.array(representations[r]['single']))
++        np.save(f'{prefix}_model_{n+1}_{model_names[r]}_structure-single.npy',np.array(representations[r]['structure_module']))
++        np.save(f'{prefix}_model_{n+1}_{model_names[r]}_structure-1stline9.npy',np.array(representations[r]['structure_module1st']))
++
++
+         if dump_pdbs:
+             #unrelaxed_pdb_path = f'{prefix}_model_{n+1}_{model_names[r]}.pdb'
+             unrelaxed_pdb_path = f'{prefix}_model_1_{model_name}.pdb' # predictable!
